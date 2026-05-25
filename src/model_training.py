@@ -4,6 +4,8 @@ import joblib
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.tree import DecisionTreeClassifier
 from xgboost import XGBClassifier
+from imblearn.over_sampling import SMOTE
+from collections import Counter
 from sklearn.metrics import (
     accuracy_score, recall_score, precision_score, f1_score,
     roc_auc_score, classification_report, confusion_matrix
@@ -35,6 +37,16 @@ class ModelTraining:
         except Exception as e:
             logger.error(f"Load error: {e}")
             raise CustomException("Failed to load processed data", e)
+        
+    def apply_smote(self):
+        try:
+            logger.info("Applying SMOTE to training data...")
+            smote = SMOTE(random_state=42)
+            self.X_train, self.y_train = smote.fit_resample(self.X_train, self.y_train)
+            logger.info(f"After SMOTE: {self.X_train.shape[0]} samples.")
+        except Exception as e:
+            logger.error(f"SMOTE error: {e}")
+            raise CustomException("Failed to apply SMOTE", e)
 
     def train_adaboost(self):
         try:
@@ -57,15 +69,18 @@ class ModelTraining:
         try:
             logger.info("Training XGBoost model...")
             self.xgb_model = XGBClassifier(
-                n_estimators=200,
-                max_depth=4,
-                learning_rate=0.05,
-                subsample=0.8,
-                colsample_bytree=0.8,
-                use_label_encoder=False,
-                eval_metric='logloss',
-                random_state=42
-            )
+                 n_estimators=177,
+                 max_depth=4,
+                 learning_rate=0.0278,
+                 subsample=0.655,
+                 colsample_bytree=0.655,
+                 min_child_weight=10,
+                 gamma=0.476,
+                 reg_alpha=0.093,
+                 reg_lambda=0.983,
+                 eval_metric="logloss",
+                 random_state=42
+                 )
             self.xgb_model.fit(self.X_train, self.y_train)
             joblib.dump(self.xgb_model, os.path.join(self.model_path, 'xgboost_model.pkl'))
             logger.info("XGBoost trained and saved.")
@@ -107,6 +122,7 @@ class ModelTraining:
 
     def run(self):
         self.load_data()
+        self.apply_smote()
         self.train_adaboost()
         self.train_xgboost()
         ada_metrics = self.evaluate_model(self.ada_model, "AdaBoost")

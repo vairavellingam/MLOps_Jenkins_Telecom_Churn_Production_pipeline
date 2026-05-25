@@ -9,12 +9,10 @@ from src.custom_exception import CustomException
 
 logger = get_logger(__name__)
 
-# ── Tenure bins (exact from notebook) ────────────────────────────────────────
+# ── Tenure bins 
 TENURE_BINS   = [0, 12, 24, 36, 48, 60, 72]
 TENURE_LABELS = ['1-12', '13-24', '25-36', '37-48', '49-60', '61-72']
 
-# ── Final feature list after get_dummies(drop_first=True) ────────────────────
-# Derived by running the notebook logic on the real data — 34 columns
 FEATURES = [
     'SeniorCitizen', 'MonthlyCharges', 'TotalCharges',
     'gender_Male',
@@ -46,7 +44,7 @@ class DataProcessing:
         os.makedirs(self.output_path, exist_ok=True)
         logger.info("DataProcessing initialized.")
 
-    # ── Step 1: load ──────────────────────────────────────────────────────────
+    # ── Step 1: load 
     def load_data(self):
         try:
             self.df = pd.read_csv(self.input_path)
@@ -55,10 +53,10 @@ class DataProcessing:
             logger.error(f"Load error: {e}")
             raise CustomException("Failed to load data", e)
 
-    # ── Step 2: clean + feature-engineer (exact notebook logic) ──────────────
+    # ── Step 2: clean + feature-engineer 
     def preprocess(self):
         try:
-            # --- data cleaning (notebook cells 18-21) ---
+           
             self.df['TotalCharges'] = pd.to_numeric(
                 self.df['TotalCharges'], errors='coerce'
             )
@@ -66,7 +64,7 @@ class DataProcessing:
             self.df.reset_index(drop=True, inplace=True)
             logger.info(f"After cleaning: {len(self.df)} rows.")
 
-            # --- tenure binning (notebook cell 25) ---
+            
             self.df['tenure_bin'] = pd.cut(
                 self.df['tenure'],
                 bins=TENURE_BINS,
@@ -76,14 +74,13 @@ class DataProcessing:
             logger.info("tenure_bin created.")
             logger.info(self.df['tenure_bin'].value_counts().sort_index().to_string())
 
-            # --- target encoding (notebook cell 29) ---
+            
             self.df['Churn'] = self.df['Churn'].map({'No': 0, 'Yes': 1})
 
-            # --- drop columns not used as features (notebook cell 27) ---
-            # Drop customerID, raw tenure (replaced by tenure_bin), and Churn
+           
             self.df.drop(columns=['customerID', 'tenure'], inplace=True)
 
-            # --- one-hot encode everything (notebook cell 29: get_dummies drop_first=True) ---
+            # --- one-hot encode everything 
             self.df = pd.get_dummies(
                 self.df,
                 columns=[
@@ -93,7 +90,7 @@ class DataProcessing:
                     'StreamingTV', 'StreamingMovies', 'Contract',
                     'PaperlessBilling', 'PaymentMethod', 'tenure_bin'
                 ],
-                drop_first=True   # ← matches notebook exactly
+                drop_first=True   
             )
 
             # Convert bool columns produced by get_dummies to int
@@ -107,7 +104,7 @@ class DataProcessing:
             logger.error(f"Preprocessing error: {e}")
             raise CustomException("Failed to preprocess data", e)
 
-    # ── Step 3: split → scale → save ─────────────────────────────────────────
+    # ── Step 3: split → scale → save
     def split_scale_save(self):
         try:
             # Align: fill any missing feature cols with 0

@@ -6,7 +6,7 @@ COPY . /app
 
 RUN pip install --no-cache-dir -e .
 
-# Run training pipeline to generate artifacts inside the image
+
 RUN python training_pipeline.py
 
 EXPOSE 5000

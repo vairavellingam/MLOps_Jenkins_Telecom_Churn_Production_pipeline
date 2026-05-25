@@ -11,7 +11,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 gitCheckout(
-                    'https://github.com/vairavellingam/MLOps_Churn_CICD.git',
+                    'https://github.com/vairavellingam/MLOps_Jenkins_Telecom_Churn_Production_pipeline.git',
                     '*/main',
                     'github-token'
                 )

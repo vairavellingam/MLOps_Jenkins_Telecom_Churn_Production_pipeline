@@ -6,14 +6,14 @@ import pandas as pd
 
 app = Flask(__name__)
 
-# ── Artifact paths ────────────────────────────────────────────────────────────
+# ── Artifact paths 
 ADABOOST_PATH = "artifacts/models/adaboost_model.pkl"
 XGBOOST_PATH  = "artifacts/models/xgboost_model.pkl"
 SCALER_PATH   = "artifacts/processed/scaler.pkl"
 FEATURES_PATH = "artifacts/processed/features.pkl"
 METRICS_PATH  = "artifacts/models/metrics.json"
 
-# ── Load all artifacts at startup ────────────────────────────────────────────
+# ── Load all artifacts at startup
 ada_model    = joblib.load(ADABOOST_PATH)
 xgb_model    = joblib.load(XGBOOST_PATH)
 scaler       = joblib.load(SCALER_PATH)
@@ -22,11 +22,11 @@ FEATURES     = joblib.load(FEATURES_PATH)
 with open(METRICS_PATH) as f:
     MODEL_METRICS = json.load(f)
 
-# ── Tenure binning (must match data_processing.py exactly) ───────────────────
+# ── Tenure binning 
 TENURE_BINS   = [0, 12, 24, 36, 48, 60, 72]
 TENURE_LABELS = ['1-12', '13-24', '25-36', '37-48', '49-60', '61-72']
 
-# ── Dropdown options for the form ────────────────────────────────────────────
+# ── Dropdown options for the form 
 DROPDOWN_OPTIONS = {
     "gender":            ["Male", "Female"],
     "SeniorCitizen":     ["No", "Yes"],
@@ -65,20 +65,20 @@ def build_feature_vector(form) -> np.ndarray:
     """Convert POST form data into the 34-column scaled feature vector."""
     vec = {f: 0.0 for f in FEATURES}
 
-    # ── Numeric ──────────────────────────────────────────────────────────────
+    # ── Numeric ─
     vec['SeniorCitizen']   = 1.0 if form.get('SeniorCitizen') == 'Yes' else 0.0
     vec['MonthlyCharges']  = float(form.get('MonthlyCharges', 0))
     vec['TotalCharges']    = float(form.get('TotalCharges', 0))
 
-    # ── tenure → tenure_bin one-hot (drop_first=True drops '1-12') ───────────
+    # ── tenure → tenure_bin one-hot 
     tenure_val = float(form.get('tenure', 1))
-    slab       = bin_tenure(tenure_val)          # e.g. '13-24'
-    col_key    = f'tenure_bin_{slab}'            # e.g. 'tenure_bin_13-24'
+    slab       = bin_tenure(tenure_val)          
+    col_key    = f'tenure_bin_{slab}'           
     if col_key in vec:
         vec[col_key] = 1.0
     # if slab == '1-12' all tenure_bin cols stay 0 (dropped reference)
 
-    # ── get_dummies drop_first=True one-hots ─────────────────────────────────
+    # ── get_dummies drop_first=True one-hots 
     # gender → gender_Male (Female is dropped reference)
     vec['gender_Male'] = 1.0 if form.get('gender') == 'Male' else 0.0
 

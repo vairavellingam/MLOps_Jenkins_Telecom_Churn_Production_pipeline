@@ -1,8 +1,9 @@
 numpy
 pandas
-scikit-learn    
+scikit-learn
 flask
-gunicorn    
+gunicorn
 joblib
 matplotlib
 seaborn
+xgboost

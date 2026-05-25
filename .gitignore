@@ -1,3 +1,11 @@
-mlops/
-MLOPS_JENKINS.egg-info/
-logs/go
+artifacts/
+logs/
+__pycache__/
+*.pyc
+*.egg-info/
+.env
+.venv/
+venv/
+*.pkl
+*.log
+.DS_Store

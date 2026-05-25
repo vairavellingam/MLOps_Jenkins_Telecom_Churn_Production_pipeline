@@ -1,25 +1,404 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width , initial-scale=1.0">
-        <link rel="stylesheet" href="static/style.css">
-        <title>High level Manufacturing Machines Efficiency Prediction </title> 
-    </head>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Telecom Churn Predictor | MLOps</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
 
-    <body>
-        <h1> High level Manufacturing Machines Efficiency Prediction</h1>
-        <form method="post">
-            {% for feature in features %}
-                <label for="{{ feature }}"> {{ feature }} :</label>
-                <input type="text" name="{{ feature }}" required><br>
-            {% endfor %}
+<!-- ── NAV ──────────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <span class="nav-icon">⬡</span>
+    <span class="nav-title">ChurnIQ</span>
+    <span class="nav-badge">MLOps</span>
+  </div>
+  <div class="nav-links">
+    <a href="#predict" class="nav-link active">Prediction</a>
+    <a href="#metrics" class="nav-link">Model Metrics</a>
+    <a href="#" class="nav-link nav-gh">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+  </div>
+</nav>
 
-            <button type="submit">PREDICT</button>
-        </form>
+<!-- ── HERO ─────────────────────────────────────────────────────────────── -->
+<header class="hero">
+  <div class="hero-hex-bg"></div>
+  <div class="hero-content">
+    <h1 class="hero-title">Telecom Customer Churn<br>Analysis &amp; Prediction</h1>
+    <p class="hero-sub">Dual-model MLOps pipeline · AdaBoost + XGBoost · Real-time inference</p>
+  </div>
+</header>
 
-        {% if prediction %}
-            <h2>Prediction : {{ prediction }}</h2>
+<!-- ── METRICS STRIP ─────────────────────────────────────────────────────── -->
+<section class="metrics-strip" id="metrics">
+  <div class="metric-card">
+    <span class="metric-label">AdaBoost Accuracy</span>
+    <span class="metric-value">{{ "%.1f"|format(metrics.adaboost.accuracy*100) }}%</span>
+  </div>
+  <div class="metric-card">
+    <span class="metric-label">AdaBoost ROC-AUC</span>
+    <span class="metric-value accent-ada">{{ metrics.adaboost.roc_auc }}</span>
+  </div>
+  <div class="metric-card">
+    <span class="metric-label">XGBoost Accuracy</span>
+    <span class="metric-value">{{ "%.1f"|format(metrics.xgboost.accuracy*100) }}%</span>
+  </div>
+  <div class="metric-card">
+    <span class="metric-label">XGBoost ROC-AUC</span>
+    <span class="metric-value accent-xgb">{{ metrics.xgboost.roc_auc }}</span>
+  </div>
+  <div class="metric-card">
+    <span class="metric-label">Training Data</span>
+    <span class="metric-value">7,043</span>
+  </div>
+  <div class="metric-card">
+    <span class="metric-label">Features Used</span>
+    <span class="metric-value">40</span>
+  </div>
+</section>
+
+<!-- ── FORM ──────────────────────────────────────────────────────────────── -->
+<main class="main" id="predict">
+  <form method="POST" action="/" id="churnForm">
+
+    <!-- Section: Demographics -->
+    <div class="form-section">
+      <div class="section-header">
+        <span class="section-icon">👤</span>
+        <h2 class="section-title">Customer Demographics</h2>
+      </div>
+      <div class="form-grid">
+
+        <div class="field-group">
+          <label class="field-label">Gender</label>
+          <div class="select-wrapper">
+            <select name="gender" class="field-select">
+              {% for opt in options.gender %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Senior Citizen</label>
+          <div class="select-wrapper">
+            <select name="SeniorCitizen" class="field-select">
+              {% for opt in options.SeniorCitizen %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Partner</label>
+          <div class="select-wrapper">
+            <select name="Partner" class="field-select">
+              {% for opt in options.Partner %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Dependents</label>
+          <div class="select-wrapper">
+            <select name="Dependents" class="field-select">
+              {% for opt in options.Dependents %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Tenure (months)</label>
+          <input type="number" name="tenure" value="12" min="0" max="72" class="field-input"/>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Section: Services -->
+    <div class="form-section">
+      <div class="section-header">
+        <span class="section-icon">📡</span>
+        <h2 class="section-title">Services Subscribed</h2>
+      </div>
+      <div class="form-grid">
+
+        <div class="field-group">
+          <label class="field-label">Phone Service</label>
+          <div class="select-wrapper">
+            <select name="PhoneService" class="field-select">
+              {% for opt in options.PhoneService %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Multiple Lines</label>
+          <div class="select-wrapper">
+            <select name="MultipleLines" class="field-select">
+              {% for opt in options.MultipleLines %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Internet Service</label>
+          <div class="select-wrapper">
+            <select name="InternetService" class="field-select">
+              {% for opt in options.InternetService %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Online Security</label>
+          <div class="select-wrapper">
+            <select name="OnlineSecurity" class="field-select">
+              {% for opt in options.OnlineSecurity %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Online Backup</label>
+          <div class="select-wrapper">
+            <select name="OnlineBackup" class="field-select">
+              {% for opt in options.OnlineBackup %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Device Protection</label>
+          <div class="select-wrapper">
+            <select name="DeviceProtection" class="field-select">
+              {% for opt in options.DeviceProtection %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Tech Support</label>
+          <div class="select-wrapper">
+            <select name="TechSupport" class="field-select">
+              {% for opt in options.TechSupport %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Streaming TV</label>
+          <div class="select-wrapper">
+            <select name="StreamingTV" class="field-select">
+              {% for opt in options.StreamingTV %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Streaming Movies</label>
+          <div class="select-wrapper">
+            <select name="StreamingMovies" class="field-select">
+              {% for opt in options.StreamingMovies %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Section: Billing -->
+    <div class="form-section">
+      <div class="section-header">
+        <span class="section-icon">💳</span>
+        <h2 class="section-title">Contract &amp; Billing</h2>
+      </div>
+      <div class="form-grid">
+
+        <div class="field-group">
+          <label class="field-label">Contract Type</label>
+          <div class="select-wrapper">
+            <select name="Contract" class="field-select">
+              {% for opt in options.Contract %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Paperless Billing</label>
+          <div class="select-wrapper">
+            <select name="PaperlessBilling" class="field-select">
+              {% for opt in options.PaperlessBilling %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Payment Method</label>
+          <div class="select-wrapper">
+            <select name="PaymentMethod" class="field-select">
+              {% for opt in options.PaymentMethod %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Monthly Charges ($)</label>
+          <input type="number" name="MonthlyCharges" value="65.00" step="0.01" min="0" class="field-input"/>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Total Charges ($)</label>
+          <input type="number" name="TotalCharges" value="1200.00" step="0.01" min="0" class="field-input"/>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PREDICT BUTTON -->
+    <div class="predict-row">
+      <button type="submit" class="predict-btn" id="predictBtn">
+        <span class="btn-icon">⚡</span>
+        Predict Churn
+      </button>
+    </div>
+
+  </form>
+
+  <!-- ── RESULTS ─────────────────────────────────────────────────────────── -->
+  {% if ada_result and xgb_result %}
+  <section class="results-section" id="results">
+
+    <div class="results-header">
+      <h2 class="results-title">Prediction Results</h2>
+      <p class="results-sub">Both models analysed below simultaneously</p>
+    </div>
+
+    <div class="results-grid">
+
+      <!-- AdaBoost Card -->
+      <div class="result-card {% if ada_result.churn %}result-churn{% else %}result-safe{% endif %}">
+        <div class="result-model-badge ada-badge">AdaBoost</div>
+        <div class="result-icon">{{ '⚠️' if ada_result.churn else '✅' }}</div>
+        <div class="result-label">
+          {{ ada_result.label if not ada_result.get('error') else 'Error' }}
+        </div>
+        {% if not ada_result.get('error') %}
+        <div class="result-prob">
+          <div class="prob-bar-bg">
+            <div class="prob-bar {% if ada_result.churn %}prob-bar-churn{% else %}prob-bar-safe{% endif %}"
+                 style="width: {{ ada_result.probability }}%"></div>
+          </div>
+          <span class="prob-value">{{ ada_result.probability }}%</span>
+        </div>
+        <div class="result-risk risk-{{ ada_result.risk.lower() }}">
+          {{ ada_result.risk }} Risk
+        </div>
+        {% else %}
+        <p class="result-error">{{ ada_result.error }}</p>
         {% endif %}
-    </body>
+      </div>
+
+      <!-- XGBoost Card -->
+      <div class="result-card {% if xgb_result.churn %}result-churn{% else %}result-safe{% endif %}">
+        <div class="result-model-badge xgb-badge">XGBoost</div>
+        <div class="result-icon">{{ '⚠️' if xgb_result.churn else '✅' }}</div>
+        <div class="result-label">
+          {{ xgb_result.label if not xgb_result.get('error') else 'Error' }}
+        </div>
+        {% if not xgb_result.get('error') %}
+        <div class="result-prob">
+          <div class="prob-bar-bg">
+            <div class="prob-bar {% if xgb_result.churn %}prob-bar-churn{% else %}prob-bar-safe{% endif %}"
+                 style="width: {{ xgb_result.probability }}%"></div>
+          </div>
+          <span class="prob-value">{{ xgb_result.probability }}%</span>
+        </div>
+        <div class="result-risk risk-{{ xgb_result.risk.lower() }}">
+          {{ xgb_result.risk }} Risk
+        </div>
+        {% else %}
+        <p class="result-error">{{ xgb_result.error }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Agreement Card -->
+      <div class="result-card result-consensus">
+        <div class="result-model-badge consensus-badge">Consensus</div>
+        <div class="result-icon">
+          {{ '🤝' if (ada_result.churn == xgb_result.churn) else '⚖️' }}
+        </div>
+        <div class="result-label">
+          {% if ada_result.churn == xgb_result.churn %}
+            Both Agree
+          {% else %}
+            Models Disagree
+          {% endif %}
+        </div>
+        {% if not ada_result.get('error') %}
+        <div class="consensus-detail">
+          <div class="consensus-row">
+            <span>AdaBoost</span>
+            <span class="{{ 'val-churn' if ada_result.churn else 'val-safe' }}">{{ ada_result.probability }}%</span>
+          </div>
+          <div class="consensus-row">
+            <span>XGBoost</span>
+            <span class="{{ 'val-churn' if xgb_result.churn else 'val-safe' }}">{{ xgb_result.probability }}%</span>
+          </div>
+          <div class="consensus-row consensus-avg">
+            <span>Avg Prob</span>
+            <span>{{ "%.1f"|format((ada_result.probability + xgb_result.probability)/2) }}%</span>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </section>
+  {% endif %}
+
+</main>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────────── -->
+<footer class="footer">
+  <p>Telecom Churn Prediction · MLOps Pipeline · AdaBoost + XGBoost · Jenkins CI/CD · Kubernetes</p>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
 </html>

@@ -2,25 +2,32 @@ apiVersion: apps/v1
 kind: Deployment
 
 metadata:
-  name: flask-deployment
+  name: churn-flask-deployment
 
 spec:
   replicas: 1
-
   selector:
     matchLabels:
-      app: flask-app
+      app: churn-flask-app
 
   template:
     metadata:
       labels:
-        app: flask-app
+        app: churn-flask-app
 
     spec:
       containers:
-        - name: flask-container
-          image: vel23/mlops-jenkins-shared-library-project:latest
+        - name: churn-flask-container
+          image: vel23/mlops-jenkins-churn-prediction:latest
           imagePullPolicy: Always
 
           ports:
             - containerPort: 5000
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
